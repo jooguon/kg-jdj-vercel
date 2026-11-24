@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>앱디의 하루</title>
+  <meta name="description" content="키글 앱디자인팀 주다정이 되어 출근부터 퇴근 후 모닥불까지 앱디자인팀의 하루를 직접 걸어 보는 페이지">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=6">
+</head>
+<body>
+  <!-- 맵 (사무실 · 섬 장면이 여기 들어감) -->
+  <div id="stage">
+    <div id="tint" aria-hidden="true"></div>
+  </div>
+
+  <!-- 상단 HUD -->
+  <header id="hud">
+    <div class="chips">
+      <span class="chip clock"><b id="clock">08:50</b><small id="clock-label">출근 중</small></span>
+      <span class="chip" title="오늘 할 일">📋 할 일 <b id="c-tasks">0/9</b></span>
+      <span class="chip hide-sm" title="인사한 팀원">👋 인사 <b id="c-team">0/8</b></span>
+      <span class="chip hide-sm" title="둘러본 팀 사무실">🚪 팀 <b id="c-doors">0/8</b></span>
+    </div>
+    <div class="btns">
+      <button class="chip-btn" id="btn-sound" title="소리 켜기/끄기" aria-label="소리 켜기/끄기">🔊</button>
+      <button class="chip-btn" id="btn-quest">📋 <span class="hide-sm">오늘 일정</span></button>
+      <button class="chip-btn" id="btn-map">🗺️ <span class="hide-sm">지도</span> <kbd class="hide-sm">M</kbd></button>
+      <button class="chip-btn skip" id="btn-skip">건너뛰기 →</button>
+    </div>
+  </header>
+  <div id="next" aria-live="polite"></div>
+
+  <!-- 조작 안내 -->
+  <aside id="legend" class="hide-sm">
+    <div><kbd>WASD</kbd><kbd>↑↓←→</kbd> 걷기</div>
+    <div><kbd>Shift</kbd> 달리기</div>
+    <div><kbd>E</kbd> 말 걸기 · 보기 · 작업</div>
+    <div><kbd>M</kbd> 지도</div>
+    <div class="muted">클릭한 곳으로도 걸어가요</div>
+  </aside>
+
+  <canvas id="minimap" width="220" height="165" aria-label="미니맵"></canvas>
+
+  <!-- 오늘 일정 -->
+  <section id="quest" class="panel" hidden>
+    <h3>📋 앱디자이너의 하루</h3>
+    <p class="muted">순서대로 하나씩! 머리 위 <b style="color:var(--pink)">!</b> 가 다음 할 일이에요.</p>
+    <ul id="quest-list"></ul>
+  </section>
+
+  <!-- 대화창 -->
+  <section id="dialog" hidden role="dialog" aria-live="polite">
+    <div class="dlg-tag" id="dlg-tag"></div>
+    <div class="dlg-body" id="dlg-body"></div>
+    <div class="dlg-foot">
+      <span class="dots" id="dlg-dots"></span>
+      <button class="dlg-next" id="dlg-next">닫기 <kbd>E</kbd></button>
+    </div>
+  </section>
+
+  <!-- 업무 작업창 -->
+  <section id="work" hidden role="dialog" aria-label="작업 화면">
+    <div class="work-card">
+      <div class="work-top"><span class="dlg-tag" id="work-tag"></span><button class="close" id="work-close">잠깐 쉬기</button></div>
+      <h2 id="work-title"></h2>
+      <p class="muted" id="work-desc"></p>
+      <div class="monitor"><div id="work-screen"></div><div id="work-stamp" hidden>완료!</div></div>
+      <div class="bar"><i id="work-bar"></i></div>
+      <button class="work-btn" id="work-btn">작업하기</button>
+    </div>
+  </section>
+
+  <!-- 전체 지도 -->
+  <section id="mapbox" hidden role="dialog" aria-label="지도">
+    <div class="map-card">
+      <div class="map-head">
+        <div><small>빠른 이동 · 장소를 누르세요</small><h2 id="map-title">지도</h2></div>
+        <button class="close" id="map-close">닫기</button>
+      </div>
+      <div class="map-wrap" id="map-wrap"><canvas id="bigmap" width="960" height="720"></canvas></div>
+    </div>
+  </section>
+
+  <div id="toasts" aria-live="polite"></div>
+  <button id="act" hidden>💬 보기</button>
+  <div id="fade" hidden></div>
+
+  <!-- 시작 화면 -->
+  <section id="intro">
+    <div class="intro-card">
+      <div class="intro-me" id="intro-me"></div>
+      <h1>앱디의 하루</h1>
+      <p class="sub">KIGLE 앱디자인팀 주다정의 출근부터 모닥불까지</p>
+      <p>출근해서 팀원들과 인사하고, 디자인·스파인·썸네일까지<br>앱디자이너의 하루를 직접 걸어 보세요.</p>
+      <div class="intro-btns">
+        <button class="primary" id="btn-start">출근하기</button>
+        <button id="btn-skip2">내용만 보기</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 건너뛰기: 스크롤형 요약 -->
+  <section id="summary" hidden>
+    <div class="sum-inner" id="sum-inner"></div>
+  </section>
+
+  <script src="data.js?v=6"></script>
+  <script src="main.js?v=6"></script>
+</body>
+</html>
